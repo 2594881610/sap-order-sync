@@ -1,0 +1,4 @@
+FROM mysql:8.4.13
+
+# 平台不允许挂载宿主机目录，初始化SQL随数据库镜像交付。
+COPY initdb/ /docker-entrypoint-initdb.d/

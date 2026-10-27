@@ -1,0 +1,60 @@
+{
+  "passed": true,
+  "elapsed_seconds": 116.5,
+  "results": [
+    {
+      "scenario": "baseline",
+      "number": 1,
+      "project": "order-bench-baseline-1-4c6c5c51",
+      "exit_code": 1,
+      "reward": "0",
+      "duplicate_observed": true,
+      "passed": true
+    },
+    {
+      "scenario": "oracle",
+      "number": 1,
+      "project": "order-bench-oracle-1-42948c7b",
+      "exit_code": 0,
+      "reward": "1",
+      "duplicate_observed": false,
+      "passed": true
+    },
+    {
+      "scenario": "baseline",
+      "number": 2,
+      "project": "order-bench-baseline-2-7fd55453",
+      "exit_code": 1,
+      "reward": "0",
+      "duplicate_observed": true,
+      "passed": true
+    },
+    {
+      "scenario": "oracle",
+      "number": 2,
+      "project": "order-bench-oracle-2-62fde8d4",
+      "exit_code": 0,
+      "reward": "1",
+      "duplicate_observed": false,
+      "passed": true
+    },
+    {
+      "scenario": "baseline",
+      "number": 3,
+      "project": "order-bench-baseline-3-48df145f",
+      "exit_code": 1,
+      "reward": "0",
+      "duplicate_observed": true,
+      "passed": true
+    },
+    {
+      "scenario": "oracle",
+      "number": 3,
+      "project": "order-bench-oracle-3-00f3672c",
+      "exit_code": 0,
+      "reward": "1",
+      "duplicate_observed": false,
+      "passed": true
+    }
+  ]
+}

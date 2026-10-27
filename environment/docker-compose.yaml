@@ -1,0 +1,26 @@
+services:
+  main:
+    image: sap-order-sync-main:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["sleep", "infinity"]
+  db:
+    image: sap-order-sync-db:local
+    build:
+      context: .
+      dockerfile: Dockerfile.db
+    environment:
+      MYSQL_ROOT_PASSWORD: local_root_demo
+      MYSQL_DATABASE: order_bench
+      MYSQL_USER: bench
+      MYSQL_PASSWORD: local_bench_demo
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=local_bench_demo mysql --protocol=TCP -h 127.0.0.1 -u bench order_bench -e 'SELECT COUNT(*) FROM orders' >/dev/null 2>&1"]
+      interval: 2s
+      timeout: 5s
+      retries: 60
+      start_period: 15s

@@ -1,0 +1,26 @@
+{
+  "basis": "用户提供的平台Oracle启动错误中的服务键白名单及禁止美元符号规则",
+  "services": {
+    "main": [
+      "image",
+      "build",
+      "depends_on",
+      "command"
+    ],
+    "db": [
+      "image",
+      "build",
+      "environment",
+      "healthcheck"
+    ]
+  },
+  "has_dollar_sign": false,
+  "literal_build_contexts": {
+    "main": ".",
+    "db": "."
+  },
+  "context_resolution_from_other_workdir": true,
+  "dollar_guard_negative_test": true,
+  "passed": true,
+  "platform_retest_required": true
+}

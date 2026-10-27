@@ -1,55 +1,57 @@
-# 验证记录
+# v2 验证记录
 
-验证日期：2026-10-27（Asia/Shanghai）。这是本地 Docker / HTTP / MySQL 的实际运行结果，不是模型难度评测。
+验证日期：2026-10-27（Asia/Shanghai）。这是本地 Docker、HTTP 和 MySQL 的实际运行记录，不是新版模型难度评测。
 
-## 环境与执行
+## 执行环境
 
-- Docker Desktop / Engine 29.3.1，Linux ARM64容器。
-- Temurin Java 17.0.15、Maven 3.9.9、Spring Boot 2.5.15、MySQL 8.4.13、Connector/J 8.4.0。
-- 最终执行：使用临时匿名Docker CLI配置连接本机Docker Desktop，运行 `python3 scripts/validate.py`（公开镜像，无私有仓库凭据）。六个场景分别创建全新数据库和容器；每次评分重新清除编译产物并离线编译当前源码。
-- 最终环境构建已通过；镜像不含IDE配置、参考解或评分文件。首次拉取镜像的网络问题通过临时下载配置解决，未修改全局Docker或代理配置。
-- 三轮正反向场景总耗时：116.5秒（不含首次下载和构建）。
+Docker Desktop / Engine 29.3.1，Linux ARM64；Temurin Java 17.0.15、Maven 3.9.9、Spring Boot 2.5.15、MySQL 8.4.13、Connector/J 8.4.0。
 
-## 本次平台启动兼容修复
+先执行 `python3 scripts/validate.py --rounds 1`，完整构建 main 和 db 并完成首轮。补齐数据库锁测试后，最终执行 `python3 scripts/validate.py --rounds 3 --reuse-images`。验证器复制当前 Java 源码、脚本、测试，清除 target 后重新离线编译；六个场景使用相互独立的全新数据库。最终三轮耗时 184.6 秒，不含镜像构建。
 
-- 平台错误指向 `environment/docker-compose.yaml` 的 `db.volumes`，发生在参考解执行之前。
-- 新增 `environment/Dockerfile.db`，通过COPY将两份初始化SQL打入MySQL镜像。
-- db服务改为构建 `sap-order-sync-db:local`，移除Compose的volumes配置；本地验证同时构建main和db。
-- 平台随后拒绝Compose中的美元符号。两份构建上下文已改为字面量相对路径点号，不再使用变量插值；从其他工作目录解析也能定位到environment目录。
-- 本地验证入口新增美元符号检查；已验证违规配置在调用Docker之前被拒绝。
-- 对照报错中的服务键白名单完成本地静态核对；此核对不替代平台实际检测。
-- 三轮日志均确认执行镜像内的01-schema.sql和02-seed.sql；镜像内SQL摘要与源码一致。
-- Java代码、接口、初始化SQL、参考解、评分脚本及用户现有task.toml和instruction.md均未修改。
-- Web IDE需更新 `environment/docker-compose.yaml` 并新增 `environment/Dockerfile.db`，同时保留完整initdb目录，再进行平台检测。
+为访问公开镜像，使用自动删除的临时匿名 Docker CLI 配置连接本机 Docker Desktop，未修改全局 Docker、凭据或代理配置。
 
 ## 三轮结果
 
-| 独立场景 | reward | 实际结果 |
+| 场景 | reward | 实测结果 |
 |---|---|---|
-| baseline-1 | 0 | 实际产生重复订单；最大17条 |
-| oracle-1 | 1 | 18项全部通过；每组始终1条 |
-| baseline-2 | 0 | 实际产生重复订单；最大12条 |
-| oracle-2 | 1 | 18项全部通过；每组始终1条 |
-| baseline-3 | 0 | 实际产生重复订单；最大28条 |
-| oracle-3 | 1 | 18项全部通过；每组始终1条 |
+| baseline-1 | 0 | 复现重复订单，最大 20 条；并发状态错误也被检出 |
+| baseline-2 | 0 | 复现重复订单，最大 13 条；并发状态错误也被检出 |
+| baseline-3 | 0 | 复现重复订单，最大 22 条；并发状态错误也被检出 |
+| oracle-1 | 1 | 32 项全部通过 |
+| oracle-2 | 1 | 32 项全部通过 |
+| oracle-3 | 1 | 32 项全部通过 |
 
-每轮包含两个独立JVM、10组每组32个相同订单请求，以及32个不同订单的并发请求。负向验证额外要求真实观察到重复记录，不会把构建失败、服务启动失败或仅缺少交付脚本当作并发故障复现。
+每场评分包含两个独立 JVM。每次测试包括 10 组各 32 个同订单请求、6 组各 32 个自动/手工排产竞争、4 组各 16 个反向重叠批次、4 组各 16 个物料变更/排产竞争，以及 32 个不同订单并发。
 
-故障版并非每一组都必定重复，个别组可能恰好只产生1条记录；本次三个全新数据库环境均在多组请求中复现重复。业务代码未添加人为延迟。
+## 业务与事务验证
 
-参考修复三轮均满足：重复请求全部成功、ID一致、真实数据库每单一行、不同订单完整落库、字段更新正确、非法输入不落库、精确编码比较、合法字段边界、重启后ID稳定和历史记录保留。
+- 串行创建、更新、重复排产；订单/计划/工序主键稳定。
+- 已排产计划生产物料不被上游覆盖，计划数量更新，工序数量快照保留。
+- 精确字符串匹配、合法数量边界、单单与批量非法输入不落库。
+- 缺少路线、不存在或已完成计划导致整批回滚。
+- 临时 CHECK 约束使第二道工序实际写入失败，三表完整回滚；移除约束后重试成功。
+- 独立事务持有订单及计划锁，提交已完成状态；参考解等待后读取最新状态，返回 409 且不产生工序。故障版该检查三轮均失败。
+- 一个订单处于数据库锁等待时，同一 JVM 仍能处理另一个订单。
+- 服务重启重试、三表历史记录保护、迁移重复执行。
 
-## 迁移与异常处理
+## 迁移与评分异常
 
-- 每轮参考解完整执行两次，评分内又重复执行迁移两次，均成功且不改变已有数据。
-- 在额外的独立探针库中插入两条重复订单，参考迁移明确失败，原始两行及数量和物料均被保留。
-- 每轮将旧评分预置为1，再主动制造编译错误，评分入口非零退出且结果被重置为0；对应证据见 `validation/reports/*-build-failure-reward.txt`。
-- 所有验证创建的容器、网络和数据库卷已由脚本清理。构建镜像和依赖缓存保留，便于复现。
+每个参考场景完整执行 solve.sh 两次，评分内执行迁移两次。另在三个隔离探针库分别注入重复订单号、重复计划关联、重复工序序号，迁移均非零退出且保留原始重复记录。三个参考场景均执行该探针检查。
 
-## 静态检查与交付边界
+每个参考场景将旧分数设为 1 并主动制造编译错误，评分入口仍先将 reward.txt 重置为 0；证据在 `validation/reports/*-build-failure-reward.txt`。
 
-Python AST、Shell语法、Maven XML、Compose配置、TOML schema 1.3及文件空白检查已通过。当前目录不是Git仓库，使用逐文件 `git diff --no-index --check` 检查空白；没有修改hdjz工程。
+临时 CHECK 约束已移除，锁会话已关闭。验证创建的六套容器及网络、数据库卷已清理。镜像与依赖缓存保留供复现。
 
-详细评分见 `validation/reports/`，总体结果见 `validation/summary.json`；本机完整执行、编译和服务日志保存在未打包的 `artifacts/`。
+## 静态检查与差异
 
-平台此前两次尝试启动Oracle评测，先因Compose的db.volumes不在白名单、后因美元符号变量插值被禁止，均在启动阶段失败，参考解尚未执行。本次已修复该配置并完成本地复测；本次字面量路径版本尚未在平台重新检测，未运行Harbor CLI或候选模型评测，不能据此认定平台Oracle通过或确定L1/L2/L3难度。本项目为AI辅助精简重写及演示数据，材料来源限制见 `PROVENANCE.md`。
+Python AST、Shell 语法、Maven XML、容器 Python 3.12 的 TOML 解析、Compose 配置与服务键白名单、逐文件 `git diff --no-index --check` 均通过。本机系统 Python 不含 tomllib，因此 TOML 校验使用镜像内 Python，未安装额外依赖。空白检查发现并清除了故障源码两处空行尾随空格，不影响逻辑。
+
+对照升级前备份确认 Dockerfile、Dockerfile.db、docker-compose.yaml 和 pom.xml 原样保留；Compose 无 volumes、无美元符号。task.toml 只替换 metadata，组织/题目名称和超时等配置保持原样。原 hdjz 工程和用户 IDE 配置均未修改。
+
+详细报告见 `validation/reports/`，源码摘要见 `validation/source-sha256.json`。完整编译、HTTP 服务和数据库执行日志位于未打包的本机 `artifacts/`。
+
+## 未执行及交付边界
+
+新版尚未提交平台 Oracle、Harbor CLI 或候选模型评测，没有推送远程 Git。旧版候选模型满分的结果不能用于判断新版难度；metadata 的 hard 是出题预期，不代表已达到平台门槛。
+
+本项目是基于真实业务调用链的 AI 辅助精简改写，使用演示数据；详见 PROVENANCE.md。没有连接真实 SAP 或生产数据库。

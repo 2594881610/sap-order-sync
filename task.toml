@@ -18,6 +18,6 @@ storage_mb = 10240
 timeout_sec = 300
 
 [metadata]
-difficulty = "medium"
+difficulty = "hard"
 category = "programming"
-tags = ["java", "mysql", "concurrency", "api", "idempotency"]
+tags = ["java", "mysql", "concurrency", "transactions", "scheduling", "idempotency"]

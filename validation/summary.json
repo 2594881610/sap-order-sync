@@ -1,11 +1,11 @@
 {
   "passed": true,
-  "elapsed_seconds": 116.5,
+  "elapsed_seconds": 184.6,
   "results": [
     {
       "scenario": "baseline",
       "number": 1,
-      "project": "order-bench-baseline-1-4c6c5c51",
+      "project": "order-bench-baseline-1-e0380928",
       "exit_code": 1,
       "reward": "0",
       "duplicate_observed": true,
@@ -14,7 +14,7 @@
     {
       "scenario": "oracle",
       "number": 1,
-      "project": "order-bench-oracle-1-42948c7b",
+      "project": "order-bench-oracle-1-1eab1190",
       "exit_code": 0,
       "reward": "1",
       "duplicate_observed": false,
@@ -23,7 +23,7 @@
     {
       "scenario": "baseline",
       "number": 2,
-      "project": "order-bench-baseline-2-7fd55453",
+      "project": "order-bench-baseline-2-17942227",
       "exit_code": 1,
       "reward": "0",
       "duplicate_observed": true,
@@ -32,7 +32,7 @@
     {
       "scenario": "oracle",
       "number": 2,
-      "project": "order-bench-oracle-2-62fde8d4",
+      "project": "order-bench-oracle-2-f9b354e5",
       "exit_code": 0,
       "reward": "1",
       "duplicate_observed": false,
@@ -41,7 +41,7 @@
     {
       "scenario": "baseline",
       "number": 3,
-      "project": "order-bench-baseline-3-48df145f",
+      "project": "order-bench-baseline-3-eb809101",
       "exit_code": 1,
       "reward": "0",
       "duplicate_observed": true,
@@ -50,11 +50,13 @@
     {
       "scenario": "oracle",
       "number": 3,
-      "project": "order-bench-oracle-3-00f3672c",
+      "project": "order-bench-oracle-3-750ae79f",
       "exit_code": 0,
       "reward": "1",
       "duplicate_observed": false,
       "passed": true
     }
-  ]
+  ],
+  "revision": "scheduling-v2",
+  "validation_date": "2026-10-27"
 }

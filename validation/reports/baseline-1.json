@@ -1,93 +1,162 @@
 {
   "checks": [
     {
-      "name": "first_create_retry_and_update",
+      "name": "serial_sync_schedule_and_protected_fields",
       "passed": true
     },
     {
-      "name": "exact_order_number_comparison",
+      "name": "exact_keys_and_boundaries",
       "passed": true
     },
     {
-      "name": "valid_field_boundaries",
+      "name": "invalid_inputs_leave_no_writes",
       "passed": true
     },
     {
-      "name": "invalid_requests_do_not_write",
+      "name": "business_conflicts_roll_back_whole_batch",
       "passed": true
     },
     {
-      "name": "concurrent_same_order_00",
-      "passed": false,
-      "error": "Concurrent creation produced 4 rows"
-    },
-    {
-      "name": "concurrent_same_order_01",
-      "passed": false,
-      "error": "Concurrent creation produced 3 rows"
-    },
-    {
-      "name": "concurrent_same_order_02",
+      "name": "database_failure_rolls_back_then_retry",
       "passed": true
     },
     {
-      "name": "concurrent_same_order_03",
+      "name": "concurrent_same_order_0",
       "passed": false,
-      "error": "Concurrent creation produced 2 rows"
+      "error": "[13, 13, 13, 13, 13, 13, 13, 18, 13, 13, 13, 13, 19, 15, 13, 13, 13, 13, 13, 13, 13, 16, 13, 13, 14, 13, 13, 13, 17, 13, 13, 13]"
     },
     {
-      "name": "concurrent_same_order_04",
+      "name": "concurrent_same_order_1",
       "passed": false,
-      "error": "Concurrent creation produced 4 rows"
+      "error": "[20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 22, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 21]"
     },
     {
-      "name": "concurrent_same_order_05",
+      "name": "concurrent_same_order_2",
       "passed": false,
-      "error": "Concurrent creation produced 17 rows"
+      "error": "[23, 23, 28, 23, 23, 23, 23, 23, 29, 23, 23, 23, 23, 23, 30, 26, 23, 23, 23, 27, 23, 24, 23, 23, 23, 23, 25, 23, 23, 23, 23, 23]"
     },
     {
-      "name": "concurrent_same_order_06",
+      "name": "concurrent_same_order_3",
       "passed": false,
-      "error": "Concurrent creation produced 3 rows"
+      "error": "[31, 46, 44, 31, 36, 32, 45, 47, 39, 43, 37, 41, 50, 31, 48, 32, 34, 31, 31, 32, 32, 31, 33, 42, 49, 31, 40, 32, 31, 38, 35, 32]"
     },
     {
-      "name": "concurrent_same_order_07",
+      "name": "concurrent_same_order_4",
       "passed": false,
-      "error": "Concurrent creation produced 11 rows"
+      "error": "[52, 51, 54, 51, 51, 51, 51, 51, 51, 55, 59, 51, 51, 51, 53, 58, 51, 51, 51, 51, 51, 51, 51, 51, 56, 51, 51, 51, 51, 51, 51, 57]"
     },
     {
-      "name": "concurrent_same_order_08",
+      "name": "concurrent_same_order_5",
       "passed": false,
-      "error": "Concurrent creation produced 17 rows"
+      "error": "[62, 62, 62, 62, 66, 69, 60, 60, 67, 60, 62, 60, 62, 68, 62, 62, 60, 63, 60, 70, 62, 62, 60, 60, 65, 60, 61, 64, 60, 60, 60, 60]"
     },
     {
-      "name": "concurrent_same_order_09",
+      "name": "concurrent_same_order_6",
       "passed": false,
-      "error": "Concurrent creation produced 2 rows"
+      "error": "[71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 74, 73, 71, 72, 71, 71]"
+    },
+    {
+      "name": "concurrent_same_order_7",
+      "passed": false,
+      "error": "[75, 78, 79, 75, 75, 75, 75, 75, 81, 75, 75, 75, 75, 75, 75, 82, 75, 75, 75, 75, 75, 75, 76, 75, 75, 75, 75, 75, 80, 75, 77, 75]"
+    },
+    {
+      "name": "concurrent_same_order_8",
+      "passed": false,
+      "error": "[83, 83, 83, 83, 83, 83, 83, 84, 83, 83, 85, 83, 86, 83, 83, 83, 83, 83, 88, 83, 87, 83, 83, 83, 83, 83, 83, 83, 83, 83, 83, 83]"
+    },
+    {
+      "name": "concurrent_same_order_9",
+      "passed": false,
+      "error": "[89, 91, 89, 89, 89, 89, 89, 89, 89, 89, 89, 93, 92, 89, 89, 89, 89, 89, 89, 89, 89, 94, 89, 89, 90, 92, 89, 89, 89, 92, 89, 89]"
+    },
+    {
+      "name": "concurrent_auto_and_manual_schedule_0",
+      "passed": false,
+      "error": "(500, '{\"timestamp\":\"2026-10-27T09:20:30.807+00:00\",\"status\":500,\"error\":\"Internal Server Error\",\"path\":\"/api/plans/schedule\"}')"
+    },
+    {
+      "name": "concurrent_auto_and_manual_schedule_1",
+      "passed": false,
+      "error": "(500, '{\"timestamp\":\"2026-10-27T09:20:30.866+00:00\",\"status\":500,\"error\":\"Internal Server Error\",\"path\":\"/api/plans/schedule\"}')"
+    },
+    {
+      "name": "concurrent_auto_and_manual_schedule_2",
+      "passed": false,
+      "error": "(500, '{\"timestamp\":\"2026-10-27T09:20:30.922+00:00\",\"status\":500,\"error\":\"Internal Server Error\",\"path\":\"/api/plans/schedule\"}')"
+    },
+    {
+      "name": "concurrent_auto_and_manual_schedule_3",
+      "passed": false,
+      "error": "(500, '{\"timestamp\":\"2026-10-27T09:20:30.986+00:00\",\"status\":500,\"error\":\"Internal Server Error\",\"path\":\"/api/plans/schedule\"}')"
+    },
+    {
+      "name": "concurrent_auto_and_manual_schedule_4",
+      "passed": false,
+      "error": "(500, '{\"timestamp\":\"2026-10-27T09:20:31.040+00:00\",\"status\":500,\"error\":\"Internal Server Error\",\"path\":\"/api/plans/schedule\"}')"
+    },
+    {
+      "name": "concurrent_auto_and_manual_schedule_5",
+      "passed": false,
+      "error": "[['51', '1', 'CUT', '7.1250'], ['53', '1', 'CUT', '7.1250'], ['55', '1', 'CUT', '7.1250'], ['57', '1', 'CUT', '7.1250'], ['52', '2', 'PACK', '7.1250'], ['54', '2', 'PACK', '7.1250'], ['56', '2', 'PACK', '7.1250'], ['58', '2', 'PACK', '7.1250']]"
+    },
+    {
+      "name": "concurrent_reverse_overlapping_batches_0",
+      "passed": false,
+      "error": "(500, '{\"timestamp\":\"2026-10-27T09:20:31.227+00:00\",\"status\":500,\"error\":\"Internal Server Error\",\"path\":\"/api/plans/schedule\"}')"
+    },
+    {
+      "name": "concurrent_reverse_overlapping_batches_1",
+      "passed": false,
+      "error": "(500, '{\"timestamp\":\"2026-10-27T09:20:31.303+00:00\",\"status\":500,\"error\":\"Internal Server Error\",\"path\":\"/api/plans/schedule\"}')"
+    },
+    {
+      "name": "concurrent_reverse_overlapping_batches_2",
+      "passed": false,
+      "error": "(500, '{\"timestamp\":\"2026-10-27T09:20:31.376+00:00\",\"status\":500,\"error\":\"Internal Server Error\",\"path\":\"/api/plans/schedule\"}')"
+    },
+    {
+      "name": "concurrent_reverse_overlapping_batches_3",
+      "passed": false,
+      "error": "(500, '{\"timestamp\":\"2026-10-27T09:20:31.441+00:00\",\"status\":500,\"error\":\"Internal Server Error\",\"path\":\"/api/plans/schedule\"}')"
+    },
+    {
+      "name": "concurrent_material_change_preserves_schedule_snapshot",
+      "passed": false,
+      "error": "(500, '{\"timestamp\":\"2026-10-27T09:20:31.483+00:00\",\"status\":500,\"error\":\"Internal Server Error\",\"path\":\"/api/plans/schedule\"}')"
+    },
+    {
+      "name": "concurrent_state_rechecked_after_lock_wait",
+      "passed": false,
+      "error": "没有根据锁释放后的最新状态拒绝排产"
+    },
+    {
+      "name": "concurrent_unrelated_order_progresses_while_one_is_locked",
+      "passed": true
     },
     {
       "name": "concurrent_distinct_orders",
       "passed": true
     },
     {
-      "name": "restart_and_retry",
+      "name": "restart_retains_ids_and_processes",
       "passed": true
     },
     {
-      "name": "historical_rows_preserved",
+      "name": "historical_three_tables_preserved",
       "passed": true
     },
     {
       "name": "migration_is_repeatable",
       "passed": false,
-      "error": "Required /app/scripts/migrate.sh is missing"
+      "error": "bash: /app/scripts/migrate.sh: No such file or directory\n"
     }
   ],
   "race_groups": [
     {
       "group": 0,
-      "row_count": 4,
-      "http_statuses": [
+      "row_count": 7,
+      "statuses": [
         200,
         200,
         200,
@@ -125,7 +194,7 @@
     {
       "group": 1,
       "row_count": 3,
-      "http_statuses": [
+      "statuses": [
         200,
         200,
         200,
@@ -162,8 +231,8 @@
     },
     {
       "group": 2,
-      "row_count": 1,
-      "http_statuses": [
+      "row_count": 8,
+      "statuses": [
         200,
         200,
         200,
@@ -200,8 +269,8 @@
     },
     {
       "group": 3,
-      "row_count": 2,
-      "http_statuses": [
+      "row_count": 20,
+      "statuses": [
         200,
         200,
         200,
@@ -238,8 +307,8 @@
     },
     {
       "group": 4,
-      "row_count": 4,
-      "http_statuses": [
+      "row_count": 9,
+      "statuses": [
         200,
         200,
         200,
@@ -276,8 +345,8 @@
     },
     {
       "group": 5,
-      "row_count": 17,
-      "http_statuses": [
+      "row_count": 11,
+      "statuses": [
         200,
         200,
         200,
@@ -314,8 +383,8 @@
     },
     {
       "group": 6,
-      "row_count": 3,
-      "http_statuses": [
+      "row_count": 4,
+      "statuses": [
         200,
         200,
         200,
@@ -352,8 +421,8 @@
     },
     {
       "group": 7,
-      "row_count": 11,
-      "http_statuses": [
+      "row_count": 8,
+      "statuses": [
         200,
         200,
         200,
@@ -390,8 +459,8 @@
     },
     {
       "group": 8,
-      "row_count": 17,
-      "http_statuses": [
+      "row_count": 6,
+      "statuses": [
         200,
         200,
         200,
@@ -428,8 +497,8 @@
     },
     {
       "group": 9,
-      "row_count": 2,
-      "http_statuses": [
+      "row_count": 6,
+      "statuses": [
         200,
         200,
         200,

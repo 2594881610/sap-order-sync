@@ -53,7 +53,7 @@ def trial(kind, number):
                 assert code != 0 and reward == '0' and report['duplicate_observed'], result
                 # 反向验证必须确实暴露重复，而不是仅因构建或启动失败得零分。
                 assert 'fatal_error' not in report, report
-                allowed = ('concurrent_same_order_', 'migration_is_repeatable')
+                allowed = ('concurrent_', 'migration_is_repeatable')
                 unexpected = [entry for entry in report['checks']
                               if not entry['passed'] and not entry['name'].startswith(allowed)]
                 assert not unexpected, unexpected
@@ -73,31 +73,38 @@ def trial(kind, number):
 
 
 def verify_migration_guard(compose, log):
-    """在独立探针库验证重复数据触发迁移失败，且两条原始记录均被保留。"""
-    setup = (
-        'CREATE DATABASE migration_probe; '
-        "GRANT ALL ON migration_probe.* TO 'bench'@'%'; "
-        'CREATE TABLE migration_probe.orders LIKE order_bench.orders; '
-        'ALTER TABLE migration_probe.orders DROP INDEX uk_orders_order_no; '
-        "INSERT INTO migration_probe.orders(order_no,item_code,qty) "
-        "VALUES ('DUP','A',1),('DUP','B',2);"
-    )
-    command(compose + ['exec', '-T', '-e', 'MYSQL_PWD=local_root_demo', 'db',
-                       'mysql', '-u', 'root', '-e', setup], log)
-    code = command(compose + ['exec', '-T', '-e', 'DB_NAME=migration_probe', 'main',
-                              'bash', '/app/scripts/migrate.sh'], log, check=False)
-    assert code != 0, 'Migration accepted preexisting duplicates'
-    query = (
-        "SELECT IF(COUNT(*)=2 AND SUM(qty)=3 AND COUNT(DISTINCT item_code)=2,'PRESERVED','BROKEN') "
-        'FROM migration_probe.orders;'
-    )
-    args = compose + ['exec', '-T', '-e', 'MYSQL_PWD=local_root_demo', 'db',
-                      'mysql', '-u', 'root', '-N', '-B', '-e', query]
-    probe = subprocess.run(args, cwd=ROOT, capture_output=True, text=True, timeout=15)
-    log.write(probe.stdout + probe.stderr)
-    assert probe.returncode == 0 and probe.stdout.strip() == 'PRESERVED', probe.stdout
-    # 失败迁移不能留下错误的唯一约束，也不能影响正常库。
-    log.write('PASS: migration rejects duplicates and preserves original rows\n')
+    """在三个隔离库分别验证订单、计划和工序重复均被拒绝且不改原数据。"""
+    for table, index, insert_sql in (
+        ('orders', 'uk_orders_order_no',
+         "INSERT INTO orders(order_no,item_code,qty) VALUES ('DUP','M-A',1),('DUP','M-B',2)"),
+        ('production_plans', 'uk_plan_order',
+         "INSERT INTO orders(id,order_no,item_code,qty) VALUES (1,'ONE','M-A',1); "
+         "INSERT INTO production_plans(order_id,item_code,qty,status) VALUES (1,'M-A',1,'WAITING'),(1,'M-B',2,'WAITING')"),
+        ('process_details', 'uk_detail_step',
+         "INSERT INTO orders(id,order_no,item_code,qty) VALUES (1,'ONE','M-A',1); "
+         "INSERT INTO production_plans(id,order_id,item_code,qty,status) VALUES (1,1,'M-A',1,'WAITING'); "
+         "INSERT INTO process_details(plan_id,step_no,process_code,qty) VALUES (1,1,'CUT',1),(1,1,'CUT',2)"),
+    ):
+        database = 'probe_' + table
+        setup = f"CREATE DATABASE {database}; GRANT ALL ON {database}.* TO 'bench'@'%'; USE {database}; "
+        for name in ('orders', 'production_plans', 'process_details'):
+            setup += f'CREATE TABLE {name} LIKE order_bench.{name}; '
+        setup += f'ALTER TABLE {table} DROP INDEX {index}; ' + insert_sql + ';'
+        command(compose + ['exec', '-T', '-e', 'MYSQL_PWD=local_root_demo', 'db',
+                           'mysql', '-u', 'root', '-e', setup], log)
+        def read_rows():
+            args = compose + ['exec', '-T', '-e', 'MYSQL_PWD=local_root_demo', 'db',
+                              'mysql', '-u', 'root', '-N', '-B', '-e',
+                              f'SELECT * FROM {database}.{table} ORDER BY id']
+            result = subprocess.run(args, cwd=ROOT, capture_output=True, text=True, timeout=15)
+            assert result.returncode == 0, result.stderr
+            return result.stdout
+        before = read_rows()
+        code = command(compose + ['exec', '-T', '-e', f'DB_NAME={database}', 'main',
+                                  'bash', '/app/scripts/migrate.sh'], log, check=False)
+        assert code != 0, f'Migration accepted duplicates in {table}'
+        assert read_rows() == before, f'Migration changed rows in {table}'
+        log.write(f'PASS: migration rejects duplicates in {table} without data loss\n')
 
 
 def verify_zero_on_build_failure(compose, output, log):
